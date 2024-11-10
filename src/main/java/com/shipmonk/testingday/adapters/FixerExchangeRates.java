@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClient;
 import java.time.LocalDate;
 import java.util.Map;
 
+@lombok.extern.log4j.Log4j2
 @Component
 public class FixerExchangeRates implements ExchangeRates {
     private final RestClient restClient;
@@ -49,6 +50,7 @@ public class FixerExchangeRates implements ExchangeRates {
 
     @Override
     public RatesDTO loadRates(LocalDate date) throws ExchangeRatesException {
+        log.info("Loading fixer exchange rates for {}", date);
         RestClient.RequestHeadersSpec<?> a = restClient
             .get()
             .uri(
@@ -61,6 +63,7 @@ public class FixerExchangeRates implements ExchangeRates {
         FixerResponse response = a.retrieve().body(FixerResponse.class);
 
         if (response.error != null) {
+            log.error("Loading fixer exchange rates error: {}", response.error);
             throw new ExchangeRatesException(
                 String.format(
                     "Failed to get response from Fixer. %s: %s",

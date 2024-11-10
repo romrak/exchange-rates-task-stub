@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
+@lombok.extern.log4j.Log4j2
 public class ExchangeRatesService {
     private final ExchangeRatesRepository repository;
     private final ExchangeRates exchangeRates;
@@ -25,6 +26,7 @@ public class ExchangeRatesService {
 
     @Transactional
     public Rates loadRates(LocalDate date) throws DateOutOfRange, ExchangeRatesException {
+        log.debug("Loading exchange rates for {}", date);
         if (date.isBefore(LocalDate.of(1999, 1, 1))) {
             throw new DateOutOfRange(String.format("Date %s is before year 1999", date));
         }
@@ -34,10 +36,11 @@ public class ExchangeRatesService {
 
         Optional<Rates> optionalRates = repository.findByDate(date);
         if (optionalRates.isPresent()) {
+            log.info("Found exchange rates for {}", date);
             return optionalRates.get();
         } else {
+            log.info("Rates not found for {}", date);
             RatesDTO loaded = exchangeRates.loadRates(date);
-            System.out.println(loaded);
             return repository.save(new Rates(
                 date,
                 loaded.collectedTimestamp(),
