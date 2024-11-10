@@ -6,10 +6,7 @@ import com.shipmonk.testingday.core.ports.ExchangeRatesException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -27,11 +24,22 @@ public class ExchangeRatesController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/{day}")
-    public ResponseEntity<Object> getRates(@PathVariable("day") String day) throws ExchangeRatesException, DateOutOfRange {
+    public ResponseEntity<Object> getRates(@PathVariable("day") LocalDate day) throws ExchangeRatesException, DateOutOfRange {
         return new ResponseEntity<>(
-            exchangeRatesService.loadRates(LocalDate.parse(day)),
+            exchangeRatesService.loadRates(day),
             HttpStatus.OK
         );
     }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleDateRangeException(DateOutOfRange exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleRatesException(ExchangeRatesException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(exception.getMessage());
+    }
+
 
 }
