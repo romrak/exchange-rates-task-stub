@@ -7,7 +7,6 @@ import com.shipmonk.testingday.core.ports.ExchangeRatesRepository;
 import com.shipmonk.testingday.core.ports.RatesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -23,7 +22,7 @@ public class ExchangeRatesService {
         this.exchangeRates = exchangeRates;
     }
 
-    @Transactional
+//    @Transactional
     public Rates loadRates(LocalDate date) throws DateOutOfRange, ExchangeRatesException {
         if (date.isBefore(LocalDate.of(1999, 1, 1))) {
             throw new DateOutOfRange(String.format("Date %s is before year 1999", date));
@@ -37,6 +36,7 @@ public class ExchangeRatesService {
             return optionalRates.get();
         } else {
             RatesDTO loaded = exchangeRates.loadRates(date);
+            System.out.println(loaded);
             return repository.save(new Rates(
                 date,
                 loaded.collectedTimestamp(),
